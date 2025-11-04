@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
+import https from 'https';
 
 export interface MagentoConfig {
   baseUrl: string;
@@ -49,6 +50,11 @@ export class MagentoClient {
   private client: AxiosInstance;
 
   constructor(config: MagentoConfig) {
+    // Create HTTPS agent that accepts self-signed certificates
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: false
+    });
+
     this.client = axios.create({
       baseURL: `${config.baseUrl}/rest/V1`,
       timeout: config.timeout || 30000,
@@ -56,6 +62,7 @@ export class MagentoClient {
         'Authorization': `Bearer ${config.accessToken}`,
         'Content-Type': 'application/json',
       },
+      httpsAgent: httpsAgent,
     });
 
     // Add error interceptor for better error messages
