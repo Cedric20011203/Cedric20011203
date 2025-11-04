@@ -197,6 +197,25 @@ export class MagentoClient {
     return response.data;
   }
 
+  async createCmsPage(pageData: any): Promise<any> {
+    const response = await this.client.post('/cmsPage', {
+      page: pageData,
+    });
+    return response.data;
+  }
+
+  async updateCmsPage(id: number, pageData: any): Promise<any> {
+    const response = await this.client.put(`/cmsPage/${id}`, {
+      page: pageData,
+    });
+    return response.data;
+  }
+
+  async deleteCmsPage(id: number): Promise<boolean> {
+    const response = await this.client.delete(`/cmsPage/${id}`);
+    return response.data;
+  }
+
   // Generic search with custom criteria
   async customSearch(endpoint: string, searchCriteria: string): Promise<any> {
     const response = await this.client.get(`${endpoint}?${searchCriteria}`);

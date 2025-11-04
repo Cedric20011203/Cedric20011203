@@ -299,6 +299,117 @@ const TOOLS: Tool[] = [
       required: ['pageId'],
     },
   },
+  {
+    name: 'magento_create_cms_page',
+    description: 'Create a new CMS page or blog post in Magento.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: {
+          type: 'string',
+          description: 'Page title',
+        },
+        identifier: {
+          type: 'string',
+          description: 'URL key/identifier (e.g., "my-blog-post")',
+        },
+        content: {
+          type: 'string',
+          description: 'HTML content of the page',
+        },
+        active: {
+          type: 'boolean',
+          description: 'Whether the page is active/published',
+          default: true,
+        },
+        pageLayout: {
+          type: 'string',
+          description: 'Page layout (e.g., "1column", "2columns-left")',
+          default: '1column',
+        },
+        metaTitle: {
+          type: 'string',
+          description: 'Meta title for SEO',
+        },
+        metaKeywords: {
+          type: 'string',
+          description: 'Meta keywords for SEO',
+        },
+        metaDescription: {
+          type: 'string',
+          description: 'Meta description for SEO',
+        },
+        storeId: {
+          type: 'array',
+          description: 'Array of store IDs (default: [0] for all stores)',
+          items: {
+            type: 'number',
+          },
+        },
+      },
+      required: ['title', 'identifier', 'content'],
+    },
+  },
+  {
+    name: 'magento_update_cms_page',
+    description: 'Update an existing CMS page or blog post.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        pageId: {
+          type: 'number',
+          description: 'CMS page ID to update',
+        },
+        title: {
+          type: 'string',
+          description: 'Page title',
+        },
+        identifier: {
+          type: 'string',
+          description: 'URL key/identifier',
+        },
+        content: {
+          type: 'string',
+          description: 'HTML content of the page',
+        },
+        active: {
+          type: 'boolean',
+          description: 'Whether the page is active/published',
+        },
+        pageLayout: {
+          type: 'string',
+          description: 'Page layout',
+        },
+        metaTitle: {
+          type: 'string',
+          description: 'Meta title for SEO',
+        },
+        metaKeywords: {
+          type: 'string',
+          description: 'Meta keywords for SEO',
+        },
+        metaDescription: {
+          type: 'string',
+          description: 'Meta description for SEO',
+        },
+      },
+      required: ['pageId'],
+    },
+  },
+  {
+    name: 'magento_delete_cms_page',
+    description: 'Delete a CMS page by ID.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        pageId: {
+          type: 'number',
+          description: 'CMS page ID to delete',
+        },
+      },
+      required: ['pageId'],
+    },
+  },
 ];
 
 // Create MCP server
@@ -564,6 +675,68 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: JSON.stringify(page, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'magento_create_cms_page': {
+        const pageData: any = {
+          title: args?.title as string,
+          identifier: args?.identifier as string,
+          content: args?.content as string,
+          active: args?.active !== undefined ? args.active : true,
+          page_layout: args?.pageLayout as string || '1column',
+          store_id: args?.storeId || [0],
+        };
+
+        if (args?.metaTitle) pageData.meta_title = args.metaTitle;
+        if (args?.metaKeywords) pageData.meta_keywords = args.metaKeywords;
+        if (args?.metaDescription) pageData.meta_description = args.metaDescription;
+
+        const result = await magentoClient.createCmsPage(pageData);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'magento_update_cms_page': {
+        const pageId = args?.pageId as number;
+        const pageData: any = {};
+
+        if (args?.title) pageData.title = args.title;
+        if (args?.identifier) pageData.identifier = args.identifier;
+        if (args?.content) pageData.content = args.content;
+        if (args?.active !== undefined) pageData.active = args.active;
+        if (args?.pageLayout) pageData.page_layout = args.pageLayout;
+        if (args?.metaTitle) pageData.meta_title = args.metaTitle;
+        if (args?.metaKeywords) pageData.meta_keywords = args.metaKeywords;
+        if (args?.metaDescription) pageData.meta_description = args.metaDescription;
+
+        const result = await magentoClient.updateCmsPage(pageId, pageData);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'magento_delete_cms_page': {
+        const pageId = args?.pageId as number;
+        const result = await magentoClient.deleteCmsPage(pageId);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ success: result, pageId }, null, 2),
             },
           ],
         };
