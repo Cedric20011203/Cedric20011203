@@ -2,6 +2,16 @@
 
 A Model Context Protocol (MCP) server that provides seamless integration with Magento 2 e-commerce platforms. This server enables AI assistants like Claude to interact with your Magento 2 store through a comprehensive set of tools for managing products, customers, orders, and more.
 
+## 🚀 Quick Start
+
+**The MCP server is built and ready to use!** However, you need to configure the Magento integration first:
+
+1. **Review Setup Instructions**: See [SETUP.md](SETUP.md) for detailed configuration steps
+2. **Enable Bearer Tokens**: Run `bin/magento config:set oauth/consumer/enable_integration_as_bearer 1` on your Magento server
+3. **Set Integration Permissions**: Grant "All" resource access in Magento Admin → System → Integrations
+4. **Test Connection**: Run `npm test` to verify everything works
+5. **Use with Claude**: Add to Claude Desktop config (see [USAGE.md](USAGE.md))
+
 ## Features
 
 This MCP server provides 18 powerful tools for interacting with Magento 2:
