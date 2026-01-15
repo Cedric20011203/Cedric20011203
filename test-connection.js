@@ -35,33 +35,36 @@ const client = axios.create({
     'Authorization': `Bearer ${MAGENTO_ACCESS_TOKEN}`,
     'Content-Type': 'application/json',
   },
+  paramsSerializer: {
+    encode: (params) => params, // Don't encode brackets
+  },
 });
 
 // Test endpoints in order of increasing permission requirements
 const tests = [
   {
-    name: 'Store Views',
-    endpoint: '/store/storeViews',
+    name: 'Store Config',
+    endpoint: '/store/storeConfigs',
     description: 'Basic store information',
   },
   {
-    name: 'Products',
-    endpoint: '/products?searchCriteria[pageSize]=3',
-    description: 'Product catalog access',
-  },
-  {
     name: 'Categories',
-    endpoint: '/categories/1',
+    endpoint: '/categories/2',
     description: 'Category tree access',
   },
   {
+    name: 'Products',
+    url: `${MAGENTO_BASE_URL}/rest/V1/products?searchCriteria[pageSize]=3`,
+    description: 'Product catalog access',
+  },
+  {
     name: 'Customers',
-    endpoint: '/customers/search?searchCriteria[pageSize]=3',
+    url: `${MAGENTO_BASE_URL}/rest/V1/customers/search?searchCriteria[pageSize]=3`,
     description: 'Customer data access',
   },
   {
     name: 'Orders',
-    endpoint: '/orders?searchCriteria[pageSize]=3',
+    url: `${MAGENTO_BASE_URL}/rest/V1/orders?searchCriteria[pageSize]=3`,
     description: 'Order data access',
   },
 ];
@@ -75,7 +78,15 @@ async function runTests() {
     process.stdout.write(`Testing ${test.name}... `);
 
     try {
-      const response = await client.get(test.endpoint);
+      const response = test.url
+        ? await axios.get(test.url, {
+            headers: {
+              'Authorization': `Bearer ${MAGENTO_ACCESS_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+            timeout: 30000,
+          })
+        : await client.get(test.endpoint);
       console.log('✅ PASS');
       passed++;
       results.push({ test: test.name, status: 'PASS', response: response.status });
